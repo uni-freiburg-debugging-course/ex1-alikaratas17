@@ -1,1 +1,4 @@
 *.pdf
+.vscode
+small_example.smt2
+.DS_Store
