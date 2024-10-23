@@ -20,7 +20,9 @@ enum EXP_TYPES
   SUBTRACTION_EXP,
   ADDITION_EXP,
   MULTIPLICATION_EXP,
+  /* DIVISION NOT REQUIRED YET
   DIVISION_EXP,
+  */
   SIMPLIFICATION_EXP,
   NUMBER_EXP,
 };
@@ -31,41 +33,7 @@ struct ast_tree_node
   int leaf_num;
   vector<ast_tree_node> args;
 };
-/*
-string tokens_to_expression(vector<string> list_of_tokens)
-{
-  return "";
-}
-vector<string> process_tokens(vector<string> list_of_tokens)
-{
-  vector<string> new_tokens;
-  int size = list_of_tokens.size();
-  if (list_of_tokens[0] == "<START_EXP>" && list_of_tokens[1] == "<SIMPLIFY>" && list_of_tokens[size - 1] == "<END_EXP>")
-  {
-    for (int i = 2; i < size - 1; i++)
-      new_tokens.push_back(list_of_tokens[i]);
-    list_of_tokens.clear();
-    return process_tokens(new_tokens);
-  }
-  if (list_of_tokens[0] == "<START_EXP>" && list_of_tokens[size - 1] == "<END_EXP>")
-  {
-    if (list_of_tokens[1].compare("+"))
-    {
-      return
-    }
-    else if (list_of_tokens[1].compare("-"))
-    {
-    }
-    else if (list_of_tokens[1].compare("*"))
-    {
-    }
-    else if (list_of_tokens[1].compare("/"))
-    {
-    }
-  }
-  return new_tokens;
-}
-*/
+
 string ast_to_str(ast_tree_node ast)
 {
   int leaf_num = ast.leaf_num;
@@ -77,34 +45,33 @@ ast_tree_node evaluate_ast(ast_tree_node ast)
 {
   if (ast.exp_type == SIMPLIFICATION_EXP)
     return evaluate_ast(ast.args[0]);
+  ast_tree_node tmp;
   if (ast.exp_type == ADDITION_EXP)
   {
-    ast_tree_node tmp;
     tmp.exp_type = NUMBER_EXP;
     tmp.leaf_num = ast.args[0].leaf_num + ast.args[1].leaf_num;
     return tmp;
   }
+  /* DIVISION NOT REQUIRED YET, ALSO NEED TO CHANGE INT
   if (ast.exp_type == DIVISION_EXP)
   {
-    ast_tree_node tmp;
     tmp.exp_type = NUMBER_EXP;
     tmp.leaf_num = ast.args[0].leaf_num / ast.args[1].leaf_num;
     return tmp;
-  }
+  }*/
   if (ast.exp_type == SUBTRACTION_EXP)
   {
-    ast_tree_node tmp;
     tmp.exp_type = NUMBER_EXP;
     tmp.leaf_num = ast.args[0].leaf_num - ast.args[1].leaf_num;
     return tmp;
   }
   if (ast.exp_type == MULTIPLICATION_EXP)
   {
-    ast_tree_node tmp;
     tmp.exp_type = NUMBER_EXP;
     tmp.leaf_num = ast.args[0].leaf_num * ast.args[1].leaf_num;
     return tmp;
   }
+  return tmp;
 }
 ast_tree_node tokens_to_ast(vector<string> tokens)
 {
@@ -136,6 +103,7 @@ ast_tree_node tokens_to_ast(vector<string> tokens)
     node.args.push_back(tokens_to_ast(right_tokens));
     return node;
   }
+  /* DIVISION NOT REQUIRED YET
   if (size >= 2 && !tokens[0].compare("<START_EXP>") && !tokens[1].compare("<DIVISION>") && !tokens[size - 1].compare("<END_EXP>"))
   {
     node.exp_type = DIVISION_EXP;
@@ -147,6 +115,7 @@ ast_tree_node tokens_to_ast(vector<string> tokens)
     node.args.push_back(tokens_to_ast(right_tokens));
     return node;
   }
+  */
   if (size >= 2 && !tokens[0].compare("<START_EXP>") && !tokens[1].compare("<MULTIPLICATION>") && !tokens[size - 1].compare("<END_EXP>"))
   {
     node.exp_type = MULTIPLICATION_EXP;
@@ -169,6 +138,7 @@ ast_tree_node tokens_to_ast(vector<string> tokens)
     node.args.push_back(tokens_to_ast(right_tokens));
     return node;
   }
+  return node;
 }
 
 string get_next_token(enum TOKEN_TYPE type, string word)
@@ -179,8 +149,10 @@ string get_next_token(enum TOKEN_TYPE type, string word)
       return "<SUBTRACTION>";
     if (!word.compare("*"))
       return "<MULTIPLICATION>";
+    /* DIVISION NOT REQUIRED YET
     if (!word.compare("/"))
       return "<DIVISION>";
+      */
     if (!word.compare("+"))
       return "<ADDITION>";
     return "<UNDEFINED>";
@@ -193,7 +165,7 @@ string get_next_token(enum TOKEN_TYPE type, string word)
     return word;
   if (type == SIMPLIFY_KEYWORD)
     return "<SIMPLIFY>";
-  //return " < " + word + " > ";
+
   return "<UNDEFINED>";
 }
 
@@ -242,7 +214,7 @@ string process_line(string line)
     else
     {
       next_type = UNDEFINED;
-      return "Syntax Error1";
+      return "Syntax Error";
     }
     next_word.push_back(line[i]);
     i++;
@@ -260,7 +232,6 @@ string process_line(string line)
       }
       if (next_word.compare("simplify"))
       {
-        //cout << next_word << endl;
         return "Syntax Error";
       }
     }
@@ -275,24 +246,10 @@ string process_line(string line)
     }
     tokens.push_back(get_next_token(next_type, next_word));
   }
-  /*
-  for (string s : tokens)
-  {
-    cout << s << endl;
-  }*/
-  // Process tokens recursively
+  // Process tokens recursively using ast
   ast_tree_node ast = tokens_to_ast(tokens);
   ast_tree_node result_ast = evaluate_ast(ast);
   return ast_to_str(result_ast);
-  /////////
-  /*
-  vector<string> processed_tokens = process_tokens(tokens);
-  string result = tokens_to_expression(processed_tokens);
-  tokens.clear();
-  processed_tokens.clear();
-  return result;
-  */
-  return "<Processed>";
 }
 
 void parse_input(string fname)
@@ -309,9 +266,8 @@ void parse_input(string fname)
   {
     string line;
     getline(input, line);
-    if(line.size()==0)continue;
-    //cout << endl;
-    //cout << line << endl;
+    if (line.size() == 0)
+      continue;
     string processed_line = process_line(line);
 
     cout << processed_line << endl;
@@ -321,7 +277,7 @@ void parse_input(string fname)
 
 int main(int argc, char *argv[])
 {
-  string filename = "simp.smt2";
+  string filename = "small_example.smt2";
   if (argc == 2)
     filename = argv[1];
   parse_input(filename);
