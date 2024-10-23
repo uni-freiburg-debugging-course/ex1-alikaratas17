@@ -10,4 +10,5 @@ Detailed instructions are in the exercise sheet. Following are your checkpoints:
 
 
 # My Notes
-- To run code we can do, 'make test'
+- To run the code we can do, 'make test'
+- Student Name: Ali Karataş
